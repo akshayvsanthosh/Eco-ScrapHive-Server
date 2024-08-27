@@ -1,6 +1,6 @@
 const categories = require('../Models/categoryModel')
-const items = require('../Models/itemModel')
-
+const items = require('../Models/itemModel');
+const orders = require('../Models/orderModel');
 
 // add category
 exports.addCategoryController = async (req, res) => {
@@ -36,12 +36,19 @@ exports.getAllCategoryController = async (req, res) => {
 
 // delete category
 exports.deleteCategoryController = async (req, res) => {
+    console.log("Inside deleteCategoryController ");
     const { cid } = req.params
     try {
         const deletedCategory = await categories.findByIdAndDelete({ _id: cid })
+        const deleteAllRelatedItems = await items.deleteMany({itemCategory:deletedCategory.categoryName})
         res.status(200).json(deletedCategory)
+        console.log(deletedCategory.categoryName);
+        console.log(deleteAllRelatedItems);
+        
     } catch (error) {
         res.status(401).json(error)
+        console.log(error);
+        
     }
 }
 
@@ -82,6 +89,7 @@ exports.addItemController = async (req, res) => {
         const existingItem = await items.findOne({ itemName })
         if (existingCategory) {
             if (existingItem) {
+                console.log("Item Already exist!!");
                 res.status(406).json("Item Already exist!!")
             } else {
                 const newItem = new items({ itemCategory, itemImage, itemName, itemPrice })
@@ -90,9 +98,11 @@ exports.addItemController = async (req, res) => {
             }
 
         } else {
+            console.log("Category not found!!");
             res.status(406).json("Category not found!!")
         }
     } catch (error) {
+        console.log(error);
         res.status(401).json(error)
     }
 }
@@ -150,6 +160,70 @@ exports.deleteItemController = async (req, res) => {
     }
 }
 
+// get all orders
+exports.getAllOrders = async (req,res) => {
+    console.log("Inside admin getAllOrders");
+    try {
+        const allOrders = await orders.find()
+        res.status(200).json(allOrders)
+    } catch (error) {
+        res.status(401).json(error)
+    }
+}
 
+// update orderStatus
+exports.orderStatusUpdateController = async (req,res) => {
+    console.log("inside  orderStatusUpdateController");
+    const {image,itemNames,address,price,orderStatus,userId} = req.body
+    const newPrice = price ? price : ""
+    const {oId} = req.params
+    console.log(image,itemNames,address,orderStatus,userId,oId);
+    try {
+        const orderAddress = {
+            userName: address['userName'],
+            phone: address['phone'],
+            pincode: address['pincode'],
+            state: address['state'],
+            date: address['date'],  // Default to current date if not provided
+            buildingName: address['buildingName'],
+            city: address['city'],
+            areaName: address['areaName'],
+            landMark: address['landMark'],
+            addressType: address['addressType'] ? address['addressType'] : ""
+        };          
+        
+        const updatedOrder = await orders.findByIdAndUpdate({_id:oId},{ userId, image, itemNames, address:orderAddress, price:newPrice, orderStatus },{new:true})             
+        await updatedOrder.save() 
+        res.status(200).json(updatedOrder)
+    } catch (error) {
+        res.status(401).json(error)
+    }
+}
 
-// delete and edit item backend completed 
+// update orderPrice
+exports.orderPriceUpdateController = async (req,res) => {
+    console.log("inside  orderPriceUpdateController");
+    const {image,itemNames,address,price,orderStatus,userId} = req.body
+    const {oId} = req.params
+    console.log(image,itemNames,address,orderStatus,userId,oId);
+    try {
+        const orderAddress = {
+            userName: address['userName'],
+            phone: address['phone'],
+            pincode: address['pincode'],
+            state: address['state'],
+            date: address['date'],  // Default to current date if not provided
+            buildingName: address['buildingName'],
+            city: address['city'],
+            areaName: address['areaName'],
+            landMark: address['landMark'],
+            addressType: address['addressType'] ? address['addressType'] : ""
+        };          
+        
+        const updatedOrder = await orders.findByIdAndUpdate({_id:oId},{ userId, image, itemNames, address:orderAddress, price, orderStatus },{new:true})             
+        await updatedOrder.save() 
+        res.status(200).json(updatedOrder)
+    } catch (error) {
+        res.status(401).json(error)
+    }
+}

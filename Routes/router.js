@@ -36,4 +36,31 @@ router.put('/admin/item/:itmid/edit',jwtMiddleware,multerMiddleware.single('item
 // delete item
 router.delete('/admin/item/:itmid/delete',jwtMiddleware,adminController.deleteItemController)
 
+// add order
+router.post('/user/order',jwtMiddleware,multerMiddleware.single('image'),userController.orderController)
+
+// get each user Orders
+router.get('/user/all-orders',jwtMiddleware,userController.getAllOrders)
+
+// get all orders - admin
+router.get('/admin/all-orders',jwtMiddleware,adminController.getAllOrders)
+
+// update orderStatus - admin
+router.put('/admin/orderStatus/:oId/update',jwtMiddleware,multerMiddleware.single('image'),adminController.orderStatusUpdateController)
+
+// update orderPrice - admin
+router.put('/admin/orderPrice/:oId/update',jwtMiddleware,multerMiddleware.single('image'),adminController.orderPriceUpdateController)
+
+// delete a order- both
+router.delete('/order/:oId/delete',jwtMiddleware,userController.deleteAOrder)
+
+// get user details
+router.get('/user/details',jwtMiddleware,userController.getUserDetails)
+
+// update user
+router.put('/user/update',jwtMiddleware,multerMiddleware.single('userImage'),userController.updateUser)
+
+// delete user
+router.delete('/user/delete',jwtMiddleware,userController.deleteUserController)
+
 module.exports=router
